@@ -109,9 +109,8 @@ const SkillsSection = () => {
     <section id="skills" className="py-24 md:py-32 relative overflow-hidden" ref={sectionRef}>
       {/* Parallax floating accent */}
       <motion.div
-        style={{ y: parallax }}
-        className="absolute -left-32 top-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
         style={{ y: parallax, background: "radial-gradient(circle, hsl(180 100% 50% / 0.06), transparent 70%)" }}
+        className="absolute -left-32 top-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
       />
 
       <div className="container mx-auto px-6" ref={ref}>

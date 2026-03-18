@@ -168,9 +168,8 @@ const ExperienceSection = () => {
           {/* Animated vertical line */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-muted/30">
             <motion.div
-              style={{ height: lineHeight }}
-              className="w-full"
               style={{ height: lineHeight, background: "linear-gradient(180deg, hsl(180 100% 50% / 0.5), hsl(270 100% 66% / 0.5))" }}
+              className="w-full"
             />
           </div>
 
