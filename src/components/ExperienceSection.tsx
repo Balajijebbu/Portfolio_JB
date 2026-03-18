@@ -1,6 +1,6 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Zap } from "lucide-react";
 
 const ease = [0.2, 0, 0, 1];
 
@@ -46,45 +46,72 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
     <div ref={ref} className={`flex gap-6 md:gap-10 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"} flex-col md:items-center`}>
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
-        animate={inView ? { opacity: 1, x: 0 } : {}}
-        transition={{ duration: 0.6, ease }}
-        className="glass-card-hover p-6 flex-1"
+        initial={{ opacity: 0, x: isLeft ? -50 : 50, rotateY: isLeft ? -10 : 10 }}
+        animate={inView ? { opacity: 1, x: 0, rotateY: 0 } : {}}
+        transition={{ duration: 0.7, ease }}
+        whileHover={{ scale: 1.02, y: -5, boxShadow: "0 0 30px hsl(180 100% 50% / 0.1)" }}
+        className="glass-card-hover p-6 flex-1 relative group"
+        style={{ perspective: 800 }}
       >
+        {/* Side glow */}
+        <motion.div
+          className={`absolute top-0 bottom-0 w-[2px] ${isLeft ? "left-0" : "right-0"}`}
+          style={{ background: "linear-gradient(180deg, transparent, hsl(180 100% 50% / 0.5), hsl(270 100% 66% / 0.5), transparent)" }}
+          initial={{ scaleY: 0 }}
+          animate={inView ? { scaleY: 1 } : {}}
+          transition={{ delay: 0.3, duration: 0.8 }}
+        />
+
         <p className="font-mono-label text-primary mb-2">{exp.period}</p>
-        <h3 className="text-xl font-bold text-foreground mb-1">{exp.role}</h3>
+        <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{exp.role}</h3>
         <p className="text-accent text-sm mb-1">{exp.company}</p>
         <p className="text-muted-foreground text-xs mb-4">{exp.location}</p>
 
         <ul className="space-y-2">
           {exp.points.map((point, i) => (
-            <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={inView ? { opacity: 1, x: 0 } : {}}
+              transition={{ delay: 0.4 + i * 0.1, duration: 0.4 }}
+              className="text-sm text-muted-foreground leading-relaxed flex gap-2"
+            >
               <span className="text-primary mt-1 shrink-0">▹</span>
               {point}
-            </li>
+            </motion.li>
           ))}
         </ul>
 
         {exp.responsibilities && (
           <>
-            <button
+            <motion.button
               onClick={() => setExpanded(!expanded)}
+              whileHover={{ x: 3 }}
               className="flex items-center gap-1 mt-4 font-mono-label text-primary hover:text-accent transition-colors"
             >
               Product Responsibilities
-              <ChevronDown size={14} className={`transition-transform ${expanded ? "rotate-180" : ""}`} />
-            </button>
+              <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                <ChevronDown size={14} />
+              </motion.span>
+            </motion.button>
             {expanded && (
               <motion.ul
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
                 className="mt-3 space-y-2"
               >
                 {exp.responsibilities.map((r, i) => (
-                  <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="text-sm text-muted-foreground leading-relaxed flex gap-2"
+                  >
                     <span className="text-accent mt-1 shrink-0">▹</span>
                     {r}
-                  </li>
+                  </motion.li>
                 ))}
               </motion.ul>
             )}
@@ -92,13 +119,20 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
         )}
       </motion.div>
 
-      {/* Timeline dot */}
+      {/* Timeline dot with pulse */}
       <motion.div
         initial={{ scale: 0 }}
         animate={inView ? { scale: 1 } : {}}
         transition={{ delay: 0.2, duration: 0.4, ease }}
-        className="hidden md:flex w-4 h-4 rounded-full bg-primary neon-glow shrink-0 relative z-10"
-      />
+        className="hidden md:flex relative"
+      >
+        <div className="w-4 h-4 rounded-full bg-primary neon-glow shrink-0 relative z-10" />
+        <motion.div
+          animate={{ scale: [1, 2, 1], opacity: [0.5, 0, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute inset-0 rounded-full bg-primary/30"
+        />
+      </motion.div>
 
       {/* Spacer */}
       <div className="flex-1 hidden md:block" />
@@ -108,23 +142,37 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
 
 const ExperienceSection = () => {
   const ref = useRef(null);
+  const sectionRef = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const lineHeight = useTransform(scrollYProgress, [0, 0.5], ["0%", "100%"]);
 
   return (
-    <section id="experience" className="py-24 md:py-32 relative">
+    <section id="experience" className="py-24 md:py-32 relative overflow-hidden" ref={sectionRef}>
       <div className="container mx-auto px-6" ref={ref}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease }}
         >
-          <p className="font-mono-label text-primary mb-3">Experience</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-16">Where I've Worked</h2>
+          <div className="flex items-center gap-3 mb-3">
+            <Zap size={16} className="text-primary animate-pulse-glow" />
+            <p className="font-mono-label text-primary">Experience</p>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-16">
+            Where I've <span className="text-primary neon-text">Worked</span>
+          </h2>
         </motion.div>
 
         <div className="relative">
-          {/* Vertical line */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2" style={{ background: "rgba(255,255,255,0.08)" }} />
+          {/* Animated vertical line */}
+          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-muted/30">
+            <motion.div
+              style={{ height: lineHeight }}
+              className="w-full"
+              style={{ height: lineHeight, background: "linear-gradient(180deg, hsl(180 100% 50% / 0.5), hsl(270 100% 66% / 0.5))" }}
+            />
+          </div>
 
           <div className="space-y-12">
             {experiences.map((exp, i) => (
