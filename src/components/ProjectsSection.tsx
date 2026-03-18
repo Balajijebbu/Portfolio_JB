@@ -162,6 +162,7 @@ const ProjectsSection = () => {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const parallaxY = useTransform(scrollYProgress, [0, 1], [60, -60]);
   const parallaxRotate = useTransform(scrollYProgress, [0, 1], [-5, 5]);
+  const parallaxY2 = useTransform(scrollYProgress, [0, 1], [-40, 80]);
 
   const filtered = filter === "All" ? projects : projects.filter((p) => p.category === filter);
 

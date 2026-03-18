@@ -67,7 +67,6 @@ const AboutSection = () => {
         style={{ y: parallaxOrb, background: "radial-gradient(circle, hsl(270 100% 66% / 0.06), transparent 70%)" }}
         className="absolute -right-40 top-1/3 w-[500px] h-[500px] rounded-full pointer-events-none"
       />
-      />
 
       <div className="container mx-auto px-6" ref={ref}>
         <motion.div
