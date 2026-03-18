@@ -169,14 +169,12 @@ const ProjectsSection = () => {
     <section id="projects" className="py-24 md:py-32 relative overflow-hidden" ref={sectionRef}>
       {/* Parallax floating orbs */}
       <motion.div
-        style={{ y: parallaxY, rotate: parallaxRotate }}
+        style={{ y: parallaxY, rotate: parallaxRotate, background: "radial-gradient(circle, hsl(180 100% 50% / 0.08), transparent 70%)" }}
         className="absolute -top-20 -right-32 w-[500px] h-[500px] rounded-full opacity-30 pointer-events-none"
-        style={{ y: parallaxY, background: "radial-gradient(circle, hsl(180 100% 50% / 0.08), transparent 70%)" }}
       />
       <motion.div
-        style={{ y: useTransform(scrollYProgress, [0, 1], [-40, 80]) }}
+        style={{ y: parallaxY2, background: "radial-gradient(circle, hsl(270 100% 66% / 0.08), transparent 70%)" }}
         className="absolute -bottom-20 -left-32 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ y: useTransform(scrollYProgress, [0, 1], [-40, 80]), background: "radial-gradient(circle, hsl(270 100% 66% / 0.08), transparent 70%)" }}
       />
 
       <div className="container mx-auto px-6" ref={ref}>
