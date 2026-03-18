@@ -1,5 +1,3 @@
-import { useState } from "react";
-import LoadingScreen from "@/components/LoadingScreen";
 import ScrollProgress from "@/components/ScrollProgress";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
@@ -10,27 +8,28 @@ import ProjectsSection from "@/components/ProjectsSection";
 import AchievementsSection from "@/components/AchievementsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
+import ChatAssistant from "@/components/ChatAssistant";
+import VisitorStats from "@/components/VisitorStats";
+import BackgroundParallax from "@/components/BackgroundParallax";
 
 const Index = () => {
-  const [loading, setLoading] = useState(true);
-
   return (
     <>
-      {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
-      {!loading && (
-        <>
-          <ScrollProgress />
-          <Navbar />
-          <HeroSection />
-          <AboutSection />
-          <SkillsSection />
-          <ExperienceSection />
-          <ProjectsSection />
-          <AchievementsSection />
-          <ContactSection />
-          <Footer />
-        </>
-      )}
+      <BackgroundParallax />
+      <ScrollProgress />
+      <Navbar />
+      <HeroSection />
+      <AboutSection />
+      <SkillsSection />
+      <ExperienceSection />
+      <ProjectsSection />
+      <AchievementsSection />
+      <ContactSection />
+      <Footer />
+      <ScrollToTop />
+      <ChatAssistant />
+      <VisitorStats />
     </>
   );
 };

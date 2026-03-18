@@ -148,12 +148,12 @@ const ExperienceSection = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 0.5], ["0%", "100%"]);
 
   return (
-    <section id="experience" className="py-24 md:py-32 relative overflow-hidden" ref={sectionRef}>
+    <section id="experience" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef}>
       <div className="container mx-auto px-6" ref={ref}>
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease }}
+          initial={{ opacity: 0, scale: 0.9, y: 30, filter: "blur(10px)" }}
+          animate={inView ? { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" } : {}}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex items-center gap-3 mb-3">
             <Zap size={16} className="text-primary animate-pulse-glow" />

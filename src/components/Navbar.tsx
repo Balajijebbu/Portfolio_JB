@@ -15,7 +15,19 @@ const Navbar = () => {
   }, []);
 
   const scrollTo = (id: string) => {
-    document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+    const element = document.getElementById(id.toLowerCase());
+    if (element) {
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
     setMobileOpen(false);
   };
 
@@ -30,7 +42,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-primary font-bold text-xl tracking-tight neon-text">
-          JB<span className="text-foreground">.</span>
+          JEYA <span className="text-foreground">BALAJI</span>
         </button>
 
         {/* Desktop */}
@@ -55,21 +67,37 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden glass-card mt-2 mx-4 p-6 flex flex-col gap-4"
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          className="md:hidden glass-card mt-2 mx-4 p-6 flex flex-col gap-4 border border-primary/20 shadow-[0_0_30px_hsl(180_100%_50%/0.1)]"
         >
-          {navItems.map((item) => (
-            <button
+          {navItems.map((item, i) => (
+            <motion.button
               key={item}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
               onClick={() => scrollTo(item)}
-              className="font-mono-label text-muted-foreground hover:text-primary transition-colors text-left"
+              className="font-mono-label text-muted-foreground hover:text-primary transition-colors text-left flex items-center justify-between group"
             >
               {item}
-            </button>
+              <motion.div 
+                className="w-1 h-1 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                layoutId={`dot-${item}`}
+              />
+            </motion.button>
           ))}
         </motion.div>
       )}
+
+      {/* Scroll progress line */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: scrolled ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+      />
     </motion.nav>
   );
 };

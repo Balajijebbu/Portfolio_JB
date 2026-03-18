@@ -1,4 +1,4 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { Mail, Phone, MapPin, Github, Linkedin, Send, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ const ContactSection = () => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
   const [copied, setCopied] = useState(false);
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success">("idle");
 
   const copyEmail = () => {
     navigator.clipboard.writeText("jeyabalajichandrasekaran@gmail.com");
@@ -30,7 +31,7 @@ const ContactSection = () => {
   ];
 
   return (
-    <section id="contact" className="py-24 md:py-32 relative overflow-hidden">
+    <section id="contact" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 100%, hsl(180 100% 50% / 0.04), transparent 60%)" }} />
 
@@ -118,8 +119,38 @@ const ContactSection = () => {
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.3, duration: 0.6, ease }}
             className="glass-card p-6 space-y-4 relative overflow-hidden"
-            onSubmit={(e) => { e.preventDefault(); toast.success("Message sent!"); }}
+            onSubmit={(e) => { 
+                e.preventDefault(); 
+                setFormStatus("submitting");
+                setTimeout(() => {
+                  setFormStatus("success");
+                  toast.success("Message sent! I'll get back to you soon.");
+                }, 1500);
+            }}
           >
+            <AnimatePresence>
+              {formStatus === "success" && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute inset-0 z-50 bg-background/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", damping: 12, stiffness: 200 }}
+                    className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4"
+                  >
+                    <Check size={32} className="text-primary" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold mb-2">Message Sent!</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Thanks for reaching out. I'll get back to you shortly.</p>
+                  <Button variant="outline" size="sm" onClick={() => setFormStatus("idle")}>
+                    Send another
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {/* Corner glow */}
             <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, hsl(180 100% 50% / 0.08), transparent)" }} />
 

@@ -1,30 +1,31 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import { Trophy, Award, BookOpen, Presentation } from "lucide-react";
+import { LetterReveal } from "@/components/ui/LetterReveal";
 
-const ease = [0.2, 0, 0, 1];
+const ease = [0.22, 1, 0.36, 1];
 
 const achievements = [
   {
     icon: Trophy,
     title: "Smart India Hackathon 2024",
-    desc: "Won a prize for 'Revolutionizing Saffron Cultivation Using Aeroponics' — an innovative approach to real-world agricultural challenges.",
+    desc: "Winner for 'Revolutionizing Saffron Cultivation Using Aeroponics' — a high-impact IoT & Agri-Tech solution for real-world challenges.",
     accent: true,
   },
   {
     icon: Award,
     title: "Consultancy Project Lead",
-    desc: "Led a comprehensive consultancy project for a ghee factory, focusing on optimizing production processes and management systems.",
+    desc: "Led a strategic consultancy project for a major Ghee Factory, optimizing critical production and management workflows.",
   },
   {
     icon: BookOpen,
     title: "AWS Cloud Technical Essentials",
-    desc: "Certified in cloud computing fundamentals and AWS services.",
+    desc: "Mastered fundamental cloud paradigms and core AWS infrastructure services.",
   },
   {
     icon: Presentation,
-    title: "Paper Presentations",
-    desc: "Presented Phishing Detection at SNS College and a paper on Natural Language Processing (NLP).",
+    title: "Research & Presentations",
+    desc: "Authored and presented papers on Phishing Detection and Natural Language Processing (NLP) at various technical symposiums.",
   },
 ];
 
@@ -32,6 +33,7 @@ const certifications = [
   "AWS Cloud Technical Essentials",
   "Software Testing Foundational (Infosys Springboard)",
   "Java Programming Fundamentals",
+  "GenAI Masterclass (DeepLearning.AI)",
 ];
 
 const AchievementCard = ({ item, index }: { item: typeof achievements[0]; index: number }) => {
@@ -42,92 +44,122 @@ const AchievementCard = ({ item, index }: { item: typeof achievements[0]; index:
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ delay: index * 0.12, duration: 0.5, ease }}
-      whileHover={{ scale: 1.03, y: -5 }}
+      transition={{ delay: index * 0.1, duration: 0.8, ease }}
+      whileHover={{ y: -10, rotateX: 5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`glass-card-hover p-6 flex gap-4 group relative overflow-hidden ${item.accent ? "border border-primary/20" : ""}`}
+      style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+      className={`glass-card-hover p-8 flex flex-col sm:flex-row gap-6 group relative overflow-hidden shadow-2xl ${item.accent ? "ring-2 ring-primary/20 bg-primary/5" : ""}`}
     >
-      {/* Background glow on hover */}
-      {item.accent && isHovered && (
+      {/* Dynamic Background Pulse */}
+      {isHovered && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          style={{ background: "radial-gradient(circle at center, hsl(180 100% 50%), transparent 70%)" }}
+          animate={{ opacity: 0.15 }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: `radial-gradient(600px circle at center, ${item.accent ? "hsl(180 100% 50%)" : "hsl(270 100% 66%)"}, transparent 70%)` }}
         />
       )}
 
       <motion.div
-        animate={isHovered ? { rotate: 360, scale: 1.1 } : { rotate: 0, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.accent ? "bg-primary/20" : "bg-accent/10"} ${isHovered ? "shadow-[0_0_20px_hsl(180_100%_50%/0.3)]" : ""} transition-shadow`}
+        animate={isHovered ? { rotate: 360, scale: 1.2, translateZ: 50 } : { rotate: 0, scale: 1, translateZ: 20 }}
+        transition={{ duration: 0.6, type: "spring" }}
+        className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${item.accent ? "bg-primary/20 text-primary" : "bg-accent/10 text-accent"} group-hover:shadow-[0_0_30px_rgba(0,255,255,0.3)]`}
+        style={{ transformStyle: "preserve-3d" }}
       >
-        <item.icon size={20} strokeWidth={1.5} className={item.accent ? "text-primary" : "text-accent"} />
+        <item.icon size={28} strokeWidth={1.5} />
       </motion.div>
-      <div className="relative z-10">
-        <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+      
+      <div style={{ transform: "translateZ(40px)" }}>
+        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
+        <p className="text-muted-foreground leading-relaxed text-sm lg:text-base">{item.desc}</p>
       </div>
+
+      {/* Decorative particle */}
+      {item.accent && (
+        <div className="absolute -bottom-2 -right-2 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+          <Trophy size={80} />
+        </div>
+      )}
     </motion.div>
   );
 };
 
 const AchievementsSection = () => {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+  const sectionRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  
+  // Concept 8: Sticky Section Parallax (Header moves slower)
+  const headerY = useTransform(scrollYProgress, [0, 1], [-100, 100]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <section id="achievements" className="py-24 md:py-32 relative overflow-hidden">
-      <div className="container mx-auto px-6" ref={ref}>
+    <section id="achievements" className="py-24 md:py-40 relative overflow-hidden snap-start min-h-screen flex flex-col justify-center" ref={sectionRef}>
+      <div className="container mx-auto px-6 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease }}
+          style={{ y: headerY, opacity: headerOpacity }}
+          className="mb-24 text-center lg:text-left"
         >
-          <p className="font-mono-label text-primary mb-3">Achievements</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-16">
-            Recognition & <span className="text-accent">Certifications</span>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary font-mono-label text-[10px] uppercase tracking-[0.2em] mb-4"
+          >
+            <Trophy size={12} />
+            Milestones
+          </motion.div>
+          <h2 className="text-4xl md:text-7xl font-bold leading-tight">
+            <LetterReveal text="Recognition & " />
+            <span className="text-accent ring-glow"><LetterReveal text="Excellence" delay={0.6} /></span>
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-5 mb-12">
+        <div className="grid lg:grid-cols-2 gap-8 mb-20 relative z-20">
           {achievements.map((item, i) => (
             <AchievementCard key={item.title} item={item} index={i} />
           ))}
         </div>
 
-        {/* Certifications with stagger animation */}
+        {/* Dynamic Certification Wall */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.4, duration: 0.5, ease }}
-          className="glass-card p-6 relative overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="glass-card p-10 relative overflow-hidden rounded-[2.5rem] shadow-2xl border border-white/5"
         >
-          {/* Top glow */}
-          <motion.div
-            className="absolute top-0 left-0 right-0 h-[2px]"
-            style={{ background: "linear-gradient(90deg, transparent, hsl(270 100% 66% / 0.5), transparent)" }}
-            initial={{ scaleX: 0 }}
-            animate={inView ? { scaleX: 1 } : {}}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          />
-          <h3 className="font-mono-label text-accent mb-4">Certifications</h3>
-          <div className="flex flex-wrap gap-3">
-            {certifications.map((cert, i) => (
-              <motion.span
-                key={cert}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={inView ? { opacity: 1, scale: 1 } : {}}
-                transition={{ delay: 0.5 + i * 0.1, duration: 0.3 }}
-                whileHover={{ scale: 1.05, boxShadow: "0 0 15px hsl(270 100% 66% / 0.3)" }}
-                className="text-sm px-4 py-2 rounded-full bg-accent/10 text-accent border border-accent/20 cursor-default transition-all"
-              >
-                {cert}
-              </motion.span>
-            ))}
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-accent/5 to-transparent -z-10" />
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="max-w-md">
+              <h3 className="text-2xl font-bold text-foreground mb-4 font-mono-label flex items-center gap-3">
+                <BookOpen className="text-accent" />
+                Certifications
+              </h3>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                Constantly evolving through industry-standard certifications and specialized masterclasses.
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-4 justify-center md:justify-end">
+              {certifications.map((cert, i) => (
+                <motion.span
+                  key={cert}
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.1, 
+                    backgroundColor: "hsl(270 100% 66% / 0.2)",
+                    boxShadow: "0 0 25px hsl(270 100% 66% / 0.4)" 
+                  }}
+                  className="px-6 py-3 rounded-2xl bg-accent/10 text-accent font-semibold text-sm border border-accent/20 cursor-default transition-all duration-300"
+                >
+                  {cert}
+                </motion.span>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>

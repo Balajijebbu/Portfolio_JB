@@ -1,8 +1,9 @@
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { Code2, Briefcase, Layers, GraduationCap } from "lucide-react";
+import { LetterReveal } from "@/components/ui/LetterReveal";
 
-const ease = [0.2, 0, 0, 1];
+const ease = [0.22, 1, 0.36, 1];
 
 const Counter = ({ end, label, suffix = "" }: { end: number; label: string; suffix?: string }) => {
   const ref = useRef(null);
@@ -12,11 +13,12 @@ const Counter = ({ end, label, suffix = "" }: { end: number; label: string; suff
   useEffect(() => {
     if (!inView) return;
     let start = 0;
-    const duration = 1500;
+    const duration = 2000;
     const step = (timestamp: number) => {
       if (!start) start = timestamp;
       const progress = Math.min((timestamp - start) / duration, 1);
-      setCount(Math.floor(progress * end));
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease out
+      setCount(Math.floor(easeProgress * end));
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -25,22 +27,20 @@ const Counter = ({ end, label, suffix = "" }: { end: number; label: string; suff
   return (
     <motion.div
       ref={ref}
-      className="text-center glass-card p-6 group hover:border-primary/30"
-      whileHover={{ scale: 1.05, y: -5 }}
-      transition={{ duration: 0.3 }}
+      className="text-center glass-card p-6 group hover:border-primary/30 relative overflow-hidden"
+      whileHover={{ scale: 1.05, y: -8, rotateX: 5 }}
+      style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <p className="text-3xl md:text-4xl font-bold text-primary neon-text tabular-nums group-hover:drop-shadow-[0_0_15px_hsl(180_100%_50%/0.5)] transition-all">
-        {count}{suffix}
-      </p>
-      <p className="font-mono-label text-muted-foreground mt-2">{label}</p>
-      {/* Glowing underline */}
-      <motion.div
-        className="h-[2px] mt-3 mx-auto rounded-full"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(180 100% 50%), transparent)" }}
-        initial={{ width: 0 }}
-        animate={inView ? { width: "60%" } : {}}
-        transition={{ delay: 0.5, duration: 0.8 }}
-      />
+      <div style={{ transform: "translateZ(30px)" }}>
+        <p className="text-3xl md:text-5xl font-extrabold text-primary neon-text tabular-nums group-hover:drop-shadow-[0_0_20px_hsl(180_100%_50%/0.6)] transition-all">
+          {count}{suffix}
+        </p>
+        <p className="font-mono-label text-muted-foreground mt-3 tracking-widest text-[10px]">{label}</p>
+      </div>
+      
+      {/* Animated background glow */}
+      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     </motion.div>
   );
 };
@@ -51,7 +51,11 @@ const AboutSection = () => {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const parallaxOrb = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  
+  // Concept 6: Glass Layer Parallax
+  const layer1Y = useTransform(scrollYProgress, [0, 1], [150, -150]);
+  const layer2Y = useTransform(scrollYProgress, [0, 1], [80, -80]);
+  const layerRotate = useTransform(scrollYProgress, [0, 1], [10, -10]);
 
   const highlights = [
     { icon: Code2, title: "React Specialist", desc: "Expert in React.js, Redux Toolkit, TypeScript & modern frontend architecture" },
@@ -61,64 +65,86 @@ const AboutSection = () => {
   ];
 
   return (
-    <section id="about" className="py-24 md:py-32 relative overflow-hidden" ref={sectionRef}>
-      {/* Parallax orb */}
+    <section id="about" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef}>
+      {/* Floating Glass Layers (Concept 6) */}
       <motion.div
-        style={{ y: parallaxOrb, background: "radial-gradient(circle, hsl(270 100% 66% / 0.06), transparent 70%)" }}
-        className="absolute -right-40 top-1/3 w-[500px] h-[500px] rounded-full pointer-events-none"
+        style={{ y: layer1Y, rotate: layerRotate }}
+        className="absolute -left-20 top-1/4 w-96 h-96 rounded-[3rem] border border-primary/10 bg-primary/5 backdrop-blur-3xl -z-10 pointer-events-none"
+      />
+      <motion.div
+        style={{ y: layer2Y, rotate: -layerRotate }}
+        className="absolute -right-20 bottom-1/4 w-80 h-80 rounded-full border border-accent/10 bg-accent/5 backdrop-blur-2xl -z-10 pointer-events-none"
       />
 
-      <div className="container mx-auto px-6" ref={ref}>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease }}
-        >
-          <p className="font-mono-label text-primary mb-3">About Me</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Crafting Digital <span className="text-primary neon-text">Experiences</span>
+      <div className="container mx-auto px-6 relative z-10" ref={ref}>
+        <div className="max-w-4xl mx-auto text-center mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center justify-center gap-3 mb-6"
+          >
+            <div className="h-[2px] w-12 bg-primary/50" />
+            <p className="font-mono-label text-primary tracking-[0.4em]">The Narrative</p>
+            <div className="h-[2px] w-12 bg-primary/50" />
+          </motion.div>
+          
+          <h2 className="text-4xl md:text-7xl font-bold mb-10 leading-tight">
+             <LetterReveal text="Crafting Digital " />
+             <span className="text-primary neon-text"><LetterReveal text="Experiences" delay={0.5} /></span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed mb-16">
-            Software Developer specializing in React.js, Redux Toolkit, TypeScript and modern JavaScript.
-            Experienced in developing scalable, responsive web applications with a focus on performance
-            optimization, clean architecture, and real-time systems.
-          </p>
-        </motion.div>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true }}
+            transition={{ delay: 1, duration: 1 }}
+            className="text-muted-foreground text-xl md:text-2xl leading-relaxed font-light italic"
+          >
+            "I don't just write code; I weave interfaces that feel intuitive, performant, and premium."
+          </motion.p>
+        </div>
 
-        {/* Counters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 0.2, duration: 0.6, ease }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
-        >
-          <Counter end={2} label="Years Exp." suffix="+" />
-          <Counter end={6} label="Projects" suffix="+" />
-          <Counter end={15} label="Technologies" suffix="+" />
-          <Counter end={8} label="CGPA" suffix=".5" />
-        </motion.div>
+        {/* Counters with improved depth */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
+          <Counter end={1} label="Year Experience" suffix="+" />
+          <Counter end={10} label="Impactful Projects" suffix="+" />
+          <Counter end={15} label="Technologies Mastered" suffix="+" />
+          <Counter end={8} label="CGPA Excellence" suffix=".5" />
+        </div>
 
-        {/* Highlight cards */}
-        <div className="grid md:grid-cols-2 gap-5">
+        {/* Highlight cards with 3D layers */}
+        <div className="grid md:grid-cols-2 gap-8">
           {highlights.map((item, i) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ delay: 0.3 + i * 0.1, duration: 0.5, ease }}
-              whileHover={{ scale: 1.02, x: 5 }}
-              className="glass-card-hover p-6 flex gap-4 group"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 + i * 0.1, duration: 0.8, ease }}
+              whileHover={{ 
+                scale: 1.05, 
+                rotateY: i % 2 === 0 ? 8 : -8,
+                rotateX: 4,
+                z: 40
+              }}
+              style={{ transformStyle: "preserve-3d", perspective: 1200 }}
+              className="glass-card-hover p-8 flex flex-col md:flex-row gap-6 group cursor-default shadow-2xl relative"
             >
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-                className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:shadow-[0_0_20px_hsl(180_100%_50%/0.2)] transition-all duration-500"
+              <div 
+                className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 group-hover:shadow-[0_0_30px_hsl(180_100%_50%/0.4)] transition-all duration-500"
+                style={{ transform: "translateZ(50px)" }}
               >
-                <item.icon size={20} strokeWidth={1.5} className="text-primary" />
-              </motion.div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                <item.icon size={32} strokeWidth={1.5} className="text-primary" />
+              </div>
+              <div style={{ transform: "translateZ(80px)" }}>
+                <h3 className="font-bold text-2xl text-foreground mb-3 group-hover:text-primary transition-colors drop-shadow-xl">{item.title}</h3>
+                <p className="text-muted-foreground text-base leading-relaxed group-hover:text-foreground/90 transition-colors">{item.desc}</p>
+              </div>
+              
+              {/* Corner decor */}
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                 <item.icon size={48} className="text-primary/20" />
               </div>
             </motion.div>
           ))}

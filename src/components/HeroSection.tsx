@@ -3,23 +3,9 @@ import { ArrowDown, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import profileImg from "@/assets/profile.jpg";
 import { useRef } from "react";
+import { LetterReveal } from "@/components/ui/LetterReveal";
 
 const ease = [0.2, 0, 0, 1];
-
-const LetterReveal = ({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) => (
-  <span className={className}>
-    {text.split("").map((char, i) => (
-      <motion.span
-        key={i}
-        initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ delay: delay + i * 0.03, duration: 0.4, ease }}
-      >
-        {char}
-      </motion.span>
-    ))}
-  </span>
-);
 
 // Floating particle component
 const FloatingParticle = ({ delay, x, y, size }: { delay: number; x: string; y: string; size: number }) => (
@@ -39,126 +25,96 @@ const FloatingParticle = ({ delay, x, y, size }: { delay: number; x: string; y: 
 const HeroSection = () => {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end start"] });
-  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const parallaxOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const parallaxScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  const parallaxOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const parallaxScale = useTransform(scrollYProgress, [0, 0.4], [1, 1.2]);
+  const parallaxBlur = useTransform(scrollYProgress, [0, 0.4], ["blur(0px)", "blur(10px)"]);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Mesh gradient background */}
-      <div className="absolute inset-0 mesh-gradient" />
+    <section ref={sectionRef} className="relative min-h-screen flex items-center justify-center overflow-hidden snap-start">
+      {/* Background elements moved to global BackgroundParallax */}
       
-      {/* Animated grid lines */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: "linear-gradient(hsl(180 100% 50%) 1px, transparent 1px), linear-gradient(90deg, hsl(180 100% 50%) 1px, transparent 1px)",
-        backgroundSize: "60px 60px",
-      }} />
-
-      {/* Floating particles */}
-      {[
-        { delay: 0, x: "10%", y: "20%", size: 4 },
-        { delay: 1, x: "80%", y: "30%", size: 3 },
-        { delay: 2, x: "60%", y: "70%", size: 5 },
-        { delay: 0.5, x: "30%", y: "80%", size: 3 },
-        { delay: 1.5, x: "90%", y: "60%", size: 4 },
-        { delay: 3, x: "20%", y: "50%", size: 6 },
-        { delay: 2.5, x: "70%", y: "15%", size: 3 },
-        { delay: 0.8, x: "50%", y: "90%", size: 4 },
-      ].map((p, i) => <FloatingParticle key={i} {...p} />)}
-
-      <div className="absolute inset-0">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 5, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(180 100% 50% / 0.08), transparent 70%)" }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.3, 1], rotate: [0, -3, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(270 100% 66% / 0.08), transparent 70%)" }}
-        />
-        <motion.div
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
-          style={{ background: "radial-gradient(circle, hsl(200 100% 50% / 0.04), transparent 70%)" }}
-        />
-      </div>
-
-      <motion.div style={{ y: parallaxY, opacity: parallaxOpacity, scale: parallaxScale }} className="container mx-auto px-6 relative z-10">
+      <motion.div 
+        style={{ 
+          y: parallaxY, 
+          opacity: parallaxOpacity, 
+          scale: parallaxScale,
+          filter: parallaxBlur 
+        }} 
+        className="container mx-auto px-6 relative z-10"
+      >
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           {/* Profile image with 3D effect */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotateY: -30 }}
-            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-            transition={{ duration: 1, ease }}
-            className="relative"
+            initial={{ opacity: 0, scale: 0.8, rotateY: -30, filter: "blur(20px)" }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0, filter: "blur(0px)" }}
+            transition={{ duration: 1.2, ease }}
+            className="relative perspective-1200"
           >
             <div className="relative animate-float">
+               <motion.div
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.7, 0.3] 
+                }}
+                transition={{ duration: 6, repeat: Infinity }}
+                className="absolute -inset-8 rounded-[3rem] bg-gradient-to-r from-primary/40 to-accent/40 blur-3xl -z-10"
+              />
+              
               <motion.div
-                whileHover={{ rotateY: 10, rotateX: -5, scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-                className="w-48 h-48 md:w-64 md:h-64 rounded-2xl overflow-hidden glass-card p-1 relative"
-                style={{ perspective: 800 }}
+                whileHover={{ rotateY: 25, rotateX: -15, scale: 1.08 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="w-56 h-56 md:w-72 md:h-72 rounded-[2.5rem] overflow-hidden glass-card p-1.5 relative z-10 shadow-2xl"
+                style={{ transformStyle: "preserve-3d" }}
               >
-                <img
-                  src={profileImg}
-                  alt="Jeya Balaji C K"
-                  className="w-full h-full object-cover rounded-xl"
-                />
-                {/* Shimmer overlay */}
-                <motion.div
-                  className="absolute inset-0 rounded-xl"
-                  animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                  style={{
-                    background: "linear-gradient(110deg, transparent 30%, hsl(180 100% 50% / 0.1) 50%, transparent 70%)",
-                    backgroundSize: "200% 100%",
-                  }}
+                <div 
+                  className="w-full h-full rounded-[2rem] overflow-hidden"
+                  style={{ transform: "translateZ(40px)" }}
+                >
+                  <img
+                    src={profileImg}
+                    alt="Jeya Balaji C K"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                {/* 3D Glass Overlay Overlay */}
+                <div 
+                  className="absolute inset-0 rounded-[2rem] border border-white/20 z-20 pointer-events-none" 
+                  style={{ transform: "translateZ(60px)" }}
                 />
               </motion.div>
-              {/* Animated glow ring */}
-              <motion.div
-                animate={{ opacity: [0.2, 0.5, 0.2] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -inset-2 rounded-2xl -z-10"
-                style={{ background: "linear-gradient(135deg, hsl(180 100% 50% / 0.3), hsl(270 100% 66% / 0.3))", filter: "blur(15px)" }}
-              />
             </div>
           </motion.div>
 
           {/* Text content */}
-          <div className="text-center lg:text-left max-w-2xl">
-            <motion.p
-              initial={{ opacity: 0, x: -20 }}
+          <div className="text-center lg:text-left max-w-2xl" style={{ transformStyle: "preserve-3d" }}>
+            <motion.div
+              style={{ transform: "translateZ(50px)" }}
+              initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="font-mono-label text-primary mb-4"
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="font-mono-label text-primary mb-6 flex items-center justify-center lg:justify-start gap-3"
             >
-              <motion.span
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                ●
-              </motion.span>
-              {" "}Software Developer
-            </motion.p>
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
+              <span className="tracking-[0.3em] font-bold">Available for hire</span>
+            </motion.div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] mb-8" style={{ transform: "translateZ(100px)" }}>
               <LetterReveal text="Hi, I'm " delay={0.5} />
               <LetterReveal text="Jeya Balaji" className="text-primary neon-text" delay={0.7} />
             </h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              initial={{ opacity: 0, y: 30, filter: "blur(15px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 1.2, duration: 0.8, ease }}
-              className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8"
+              transition={{ delay: 1.4, duration: 1, ease }}
+              className="text-xl md:text-2xl text-muted-foreground leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0"
+              style={{ transform: "translateZ(80px)" }}
             >
-              Building Scalable & High-Performance Web Applications
+              Building next-gen <span className="text-foreground font-semibold">Web Experiences</span> & <span className="text-foreground font-semibold">IoT Solutions</span>.
             </motion.p>
+
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
