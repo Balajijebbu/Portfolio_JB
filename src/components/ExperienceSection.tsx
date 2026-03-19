@@ -1,4 +1,4 @@
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef, useState } from "react";
 import { ChevronDown, Zap } from "lucide-react";
 
@@ -41,18 +41,45 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const isLeft = index % 2 === 0;
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y });
+  };
 
   return (
     <div ref={ref} className={`flex gap-6 md:gap-10 ${isLeft ? "md:flex-row" : "md:flex-row-reverse"} flex-col md:items-center`}>
-      {/* Card */}
       <motion.div
-        initial={{ opacity: 0, x: isLeft ? -50 : 50, rotateY: isLeft ? -10 : 10 }}
+        initial={{ opacity: 0, x: isLeft ? -50 : 50, rotateY: isLeft ? -15 : 15 }}
         animate={inView ? { opacity: 1, x: 0, rotateY: 0 } : {}}
         transition={{ duration: 0.7, ease }}
-        whileHover={{ scale: 1.02, y: -5, boxShadow: "0 0 30px hsl(180 100% 50% / 0.1)" }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => { setIsHovered(false); setMousePos({ x: 0, y: 0 }); }}
+        style={{
+          perspective: 1000,
+          transform: isHovered
+            ? `perspective(1000px) rotateY(${mousePos.x * 15}deg) rotateX(${-mousePos.y * 15}deg) translateZ(20px)`
+            : "perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0px)",
+          transition: "transform 0.15s ease-out",
+          transformStyle: "preserve-3d",
+        }}
         className="glass-card-hover p-6 flex-1 relative group"
-        style={{ perspective: 800 }}
       >
+        {/* Spotlight cursor */}
+        <div
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{
+            background: isHovered
+              ? `radial-gradient(350px circle at ${(mousePos.x + 0.5) * 100}% ${(mousePos.y + 0.5) * 100}%, hsl(180 100% 50% / 0.1), transparent 60%)`
+              : "none",
+          }}
+        />
+
         {/* Side glow */}
         <motion.div
           className={`absolute top-0 bottom-0 w-[2px] ${isLeft ? "left-0" : "right-0"}`}
@@ -62,12 +89,14 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
           transition={{ delay: 0.3, duration: 0.8 }}
         />
 
-        <p className="font-mono-label text-primary mb-2">{exp.period}</p>
-        <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{exp.role}</h3>
-        <p className="text-accent text-sm mb-1">{exp.company}</p>
-        <p className="text-muted-foreground text-xs mb-4">{exp.location}</p>
+        <div style={{ transform: "translateZ(30px)" }}>
+          <p className="font-mono-label text-primary mb-2">{exp.period}</p>
+          <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{exp.role}</h3>
+          <p className="text-accent text-sm mb-1">{exp.company}</p>
+          <p className="text-muted-foreground text-xs mb-4">{exp.location}</p>
+        </div>
 
-        <ul className="space-y-2">
+        <ul className="space-y-2" style={{ transform: "translateZ(20px)" }}>
           {exp.points.map((point, i) => (
             <motion.li
               key={i}
@@ -134,7 +163,6 @@ const TimelineCard = ({ exp, index }: { exp: typeof experiences[0]; index: numbe
         />
       </motion.div>
 
-      {/* Spacer */}
       <div className="flex-1 hidden md:block" />
     </div>
   );
@@ -147,9 +175,13 @@ const ExperienceSection = () => {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const lineHeight = useTransform(scrollYProgress, [0, 0.5], ["0%", "100%"]);
 
+  // Section-level 3D scroll
+  const sectionRotateX = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [6, 0, 0, -6]);
+  const smoothRotateX = useSpring(sectionRotateX, { damping: 40, stiffness: 120 });
+
   return (
-    <section id="experience" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef}>
-      <div className="container mx-auto px-6" ref={ref}>
+    <section id="experience" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef} style={{ perspective: "1400px" }}>
+      <motion.div style={{ rotateX: smoothRotateX }} className="container mx-auto px-6" ref={ref}>
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30, filter: "blur(10px)" }}
           animate={inView ? { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -165,7 +197,6 @@ const ExperienceSection = () => {
         </motion.div>
 
         <div className="relative">
-          {/* Animated vertical line */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-muted/30">
             <motion.div
               style={{ height: lineHeight, background: "linear-gradient(180deg, hsl(180 100% 50% / 0.5), hsl(270 100% 66% / 0.5))" }}
@@ -179,7 +210,7 @@ const ExperienceSection = () => {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
