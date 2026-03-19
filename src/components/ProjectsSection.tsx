@@ -1,4 +1,4 @@
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring } from "framer-motion";
 import { useRef, useState } from "react";
 import { ExternalLink, Github, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -9,8 +9,7 @@ import projectInventory from "@/assets/project-inventory-premium.png";
 import projectCodeLogic from "@/assets/project-logic-premium.png";
 import projectSaffron from "@/assets/project-saffron.jpg";
 import projectCo2 from "@/assets/project-co2.jpg";
-import projectGift from "C:\\Users\\jeyab\\.gemini\\antigravity\\brain\\81f5240a-c675-469d-b387-c8b25dff1e68\\project_gift_generator_1773865974854.png";
-import projectLibrary from "@/assets/project-inventory-premium.png"; // Repurposing as it matches the vibe
+import projectLibrary from "@/assets/project-inventory-premium.png";
 
 const ease = [0.2, 0, 0, 1];
 
@@ -41,11 +40,11 @@ const projects = [
     github: "https://github.com/Balajijebbu/Inventory-Management-Ecommerce-Application-for-Ghee-Factory"
   },
   {
-    title: "Gift Idea Generator",
-    desc: "AI-driven Personalized Gift Idea Generator using GenAI to suggest perfect gifts based on personality and occasion.",
-    tech: ["React", "GenAI", "Ollama"],
+    title: "Code to Logic Generator",
+    desc: "Hackathon project demonstrating problem-solving skills and the ability to work under pressure within a limited timeframe.",
+    tech: ["React", "GenAI", "Hackathon"],
     category: "AI",
-    image: projectGift,
+    image: projectCodeLogic,
     github: "https://github.com/Balajijebbu/Personalized-Gift-Idea-Generator"
   },
   {
@@ -128,9 +127,9 @@ const ProjectCard = ({ project, index }: { project: typeof projects[0]; index: n
           transition={{ duration: 0.6, ease }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        
+
         {/* Floating Category Badge */}
-        <div 
+        <div
           className="absolute top-4 left-4 px-3 py-1 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-[10px] font-bold text-primary uppercase tracking-widest z-30"
           style={{ transform: "translateZ(80px)" }}
         >
@@ -142,27 +141,27 @@ const ProjectCard = ({ project, index }: { project: typeof projects[0]; index: n
         <div className="flex items-center justify-between mb-3" style={{ transform: "translateZ(90px)", transformStyle: "preserve-3d" }}>
           <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 drop-shadow-xl">{project.title}</h3>
           <div className="flex gap-3">
-            <motion.a 
-              href={(project as any).github || "https://github.com/Balajijebbu"} 
-              target="_blank" 
+            <motion.a
+              href={project.github}
+              target="_blank"
               rel="noopener noreferrer"
-              whileHover={{ scale: 1.4, rotate: 15, z: 120 }} 
+              whileHover={{ scale: 1.4, rotate: 15, z: 120 }}
               className="cursor-pointer"
             >
               <Github size={18} strokeWidth={1.5} className="text-muted-foreground hover:text-primary hover:drop-shadow-[0_0_15px_hsl(180_100%_50%/0.8)] transition-all" />
             </motion.a>
-            <motion.a 
-              href={(project as any).github || "https://github.com/Balajijebbu"} 
-              target="_blank" 
+            <motion.a
+              href={project.github}
+              target="_blank"
               rel="noopener noreferrer"
-              whileHover={{ scale: 1.4, rotate: -15, z: 120 }} 
+              whileHover={{ scale: 1.4, rotate: -15, z: 120 }}
               className="cursor-pointer"
             >
               <ExternalLink size={18} strokeWidth={1.5} className="text-muted-foreground hover:text-primary hover:drop-shadow-[0_0_15px_hsl(180_100%_50%/0.8)] transition-all" />
             </motion.a>
           </div>
         </div>
-        
+
         <p className="text-sm text-muted-foreground leading-relaxed mb-6 group-hover:text-foreground/90 transition-colors" style={{ transform: "translateZ(60px)" }}>
           {project.desc}
         </p>
@@ -193,9 +192,10 @@ const ProjectsSection = () => {
   const [filter, setFilter] = useState("All");
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const parallaxY = useTransform(scrollYProgress, [0, 1], [60, -60]);
-  const parallaxRotate = useTransform(scrollYProgress, [0, 1], [-5, 5]);
-  const parallaxY2 = useTransform(scrollYProgress, [0, 1], [-40, 80]);
+
+  // Section-level 3D scroll parallax
+  const sectionRotateX = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [6, 0, 0, -6]);
+  const smoothRotateX = useSpring(sectionRotateX, { damping: 40, stiffness: 120 });
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -203,15 +203,15 @@ const ProjectsSection = () => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 
-    const filtered = (filter === "All" 
-    ? projects 
-    : projects.filter((p) => 
-        p.category === filter || 
+  const filtered = (filter === "All"
+    ? projects
+    : projects.filter((p) =>
+        p.category === filter ||
         (filter === "React" && p.tech.some(t => t.toLowerCase().includes("react")))
-      )).filter(p => !p.title.includes("Saffron")); // Hide featured from grid
+      )).filter(p => !p.title.includes("Saffron"));
 
   return (
-    <section id="projects" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef} onMouseMove={handleMouseMove}>
+    <section id="projects" className="py-24 md:py-32 relative overflow-hidden snap-start min-h-screen flex items-center" ref={sectionRef} onMouseMove={handleMouseMove} style={{ perspective: "1400px" }}>
       {/* Mouse glow trail */}
       <motion.div
         className="glow-trail"
@@ -222,7 +222,7 @@ const ProjectsSection = () => {
         transition={{ type: "spring", damping: 30, stiffness: 200, mass: 0.5 }}
       />
 
-      <div className="container mx-auto px-6" ref={ref}>
+      <motion.div style={{ rotateX: smoothRotateX }} className="container mx-auto px-6" ref={ref}>
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 40, filter: "blur(10px)" }}
           animate={inView ? { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -256,7 +256,6 @@ const ProjectsSection = () => {
               ))}
             </div>
 
-            {/* Smart Recommender Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -278,59 +277,60 @@ const ProjectsSection = () => {
         {/* Featured Project Spotlight */}
         <div className="mb-20">
           <p className="font-mono-label text-accent mb-4 text-center uppercase tracking-[0.3em] font-bold">Featured Spotlight</p>
-          {projects.filter(p => p.title.includes("Saffron")).map((project, i) => (
-             <motion.div
+          {projects.filter(p => p.title.includes("Saffron")).map((project) => (
+            <motion.div
               key={project.title}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
+              whileHover={{ rotateX: 2, rotateY: -2 }}
+              style={{ transformStyle: "preserve-3d", perspective: 1200 }}
               className="relative rounded-3xl overflow-hidden glass-card border border-accent/20 h-[500px] group shadow-[0_0_50px_hsl(270_100%_66%/0.1)]"
-             >
-                <div className="absolute inset-0 z-0">
-                   <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" />
-                   <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
-                </div>
-                
-                <div className="relative z-10 h-full flex flex-col justify-center px-12 md:px-20 max-w-3xl">
-                   <motion.div 
-                    initial={{ x: -20, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 w-fit"
-                   >
-                      <Sparkles size={14} className="text-accent" />
-                      <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Smart India Hackathon 2024 Winner</span>
-                   </motion.div>
-                   
-                   <h3 className="text-4xl md:text-6xl font-bold mb-6 text-foreground leading-tight">
-                      Saffron <span className="text-accent neon-text-accent">Cultivation</span>
-                   </h3>
-                   <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                      {project.desc} This groundbreaking project revolutionized crop management using advanced IoT sensors and automated nutrient delivery.
-                   </p>
-                   
-                   <div className="flex flex-wrap gap-3 mb-10">
-                      {project.tech.map(t => (
-                        <span key={t} className="px-4 py-2 rounded-xl bg-accent/10 border border-accent/20 text-accent text-xs font-mono">
-                           {t}
-                        </span>
-                      ))}
-                   </div>
-                   
-                   <div className="flex gap-4">
-                      <a href={project.github} target="_blank" className="px-8 py-3 rounded-xl bg-accent text-accent-foreground font-bold hover:shadow-[0_0_30px_hsl(270_100%_66%/0.5)] transition-all flex items-center gap-2">
-                         <Github size={18} /> View Repository
-                      </a>
-                   </div>
+            >
+              <div className="absolute inset-0 z-0">
+                <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+              </div>
+
+              <div className="relative z-10 h-full flex flex-col justify-center px-12 md:px-20 max-w-3xl" style={{ transform: "translateZ(40px)" }}>
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 w-fit"
+                >
+                  <Sparkles size={14} className="text-accent" />
+                  <span className="text-[10px] font-bold text-accent uppercase tracking-widest">Smart India Hackathon 2024 Winner</span>
+                </motion.div>
+
+                <h3 className="text-4xl md:text-6xl font-bold mb-6 text-foreground leading-tight" style={{ transform: "translateZ(60px)" }}>
+                  Saffron <span className="text-accent neon-text-accent">Cultivation</span>
+                </h3>
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed" style={{ transform: "translateZ(30px)" }}>
+                  {project.desc} This groundbreaking project revolutionized crop management using advanced IoT sensors and automated nutrient delivery.
+                </p>
+
+                <div className="flex flex-wrap gap-3 mb-10" style={{ transform: "translateZ(20px)" }}>
+                  {project.tech.map(t => (
+                    <span key={t} className="px-4 py-2 rounded-xl bg-accent/10 border border-accent/20 text-accent text-xs font-mono">
+                      {t}
+                    </span>
+                  ))}
                 </div>
 
-                {/* Decorative particles */}
-                <div className="absolute top-10 right-10 flex gap-4 opacity-30">
-                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}>
-                      <Sparkles size={100} className="text-accent" />
-                   </motion.div>
+                <div className="flex gap-4" style={{ transform: "translateZ(50px)" }}>
+                  <a href={project.github} target="_blank" className="px-8 py-3 rounded-xl bg-accent text-accent-foreground font-bold hover:shadow-[0_0_30px_hsl(270_100%_66%/0.5)] transition-all flex items-center gap-2">
+                    <Github size={18} /> View Repository
+                  </a>
                 </div>
-             </motion.div>
+              </div>
+
+              <div className="absolute top-10 right-10 flex gap-4 opacity-30">
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}>
+                  <Sparkles size={100} className="text-accent" />
+                </motion.div>
+              </div>
+            </motion.div>
           ))}
         </div>
 
@@ -339,7 +339,7 @@ const ProjectsSection = () => {
             <ProjectCard key={project.title} project={project} index={i} />
           ))}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 };
