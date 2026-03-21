@@ -1,20 +1,19 @@
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { useEffect } from "react";
 
 const BackgroundParallax = () => {
   const { scrollY } = useScroll();
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
   useEffect(() => {
     const handleMouse = (e: MouseEvent) => {
-      setMousePos({
-        x: (e.clientX / window.innerWidth) - 0.5,
-        y: (e.clientY / window.innerHeight) - 0.5,
-      });
+      mouseX.set((e.clientX / window.innerWidth) - 0.5);
+      mouseY.set((e.clientY / window.innerHeight) - 0.5);
     };
-    window.addEventListener("mousemove", handleMouse);
+    window.addEventListener("mousemove", handleMouse, { passive: true });
     return () => window.removeEventListener("mousemove", handleMouse);
-  }, []);
+  }, [mouseX, mouseY]);
 
   // Orb layers
   const orbs = [
@@ -56,7 +55,7 @@ const BackgroundParallax = () => {
       {/* Floating geometric wireframes */}
       <FloatingGeometry
         scrollY={scrollY}
-        mousePos={mousePos}
+        mouseX={mouseX}
         style={{ top: "20%", left: "8%" }}
         size={120}
         speed={0.15}
@@ -65,7 +64,7 @@ const BackgroundParallax = () => {
       />
       <FloatingGeometry
         scrollY={scrollY}
-        mousePos={mousePos}
+        mouseX={mouseX}
         style={{ top: "55%", right: "12%" }}
         size={90}
         speed={0.1}
@@ -74,7 +73,7 @@ const BackgroundParallax = () => {
       />
       <FloatingGeometry
         scrollY={scrollY}
-        mousePos={mousePos}
+        mouseX={mouseX}
         style={{ bottom: "30%", left: "60%" }}
         size={70}
         speed={0.2}
@@ -83,7 +82,7 @@ const BackgroundParallax = () => {
       />
       <FloatingGeometry
         scrollY={scrollY}
-        mousePos={mousePos}
+        mouseX={mouseX}
         style={{ top: "75%", left: "25%" }}
         size={100}
         speed={0.08}
@@ -93,7 +92,7 @@ const BackgroundParallax = () => {
 
       {/* Orbs */}
       {orbs.map((orb, i) => (
-        <Orb key={i} shape={orb} scrollY={scrollY} mousePos={mousePos} />
+        <Orb key={i} shape={orb} scrollY={scrollY} mouseX={mouseX} mouseY={mouseY} />
       ))}
 
       {/* Horizontal scan lines */}
@@ -114,9 +113,12 @@ const BackgroundParallax = () => {
   );
 };
 
-const Orb = ({ shape, scrollY, mousePos }: any) => {
+const Orb = ({ shape, scrollY, mouseX, mouseY }: any) => {
   const y = useTransform(scrollY, [0, 5000], [0, 5000 * shape.speed]);
   const springY = useSpring(y, { damping: 50, stiffness: 200 });
+  
+  const moveX = useTransform(mouseX, [-0.5, 0.5], [-shape.mSpeed, shape.mSpeed]);
+  const moveY = useTransform(mouseY, [-0.5, 0.5], [-shape.mSpeed, shape.mSpeed]);
 
   return (
     <motion.div
@@ -126,8 +128,8 @@ const Orb = ({ shape, scrollY, mousePos }: any) => {
         height: shape.size,
         backgroundColor: shape.color,
         y: springY,
-        x: mousePos.x * shape.mSpeed,
-        translateY: mousePos.y * shape.mSpeed,
+        x: moveX,
+        translateY: moveY,
         filter: "blur(60px)",
       }}
       className="absolute rounded-full"
@@ -146,7 +148,7 @@ const Orb = ({ shape, scrollY, mousePos }: any) => {
 
 const FloatingGeometry = ({
   scrollY,
-  mousePos,
+  mouseX,
   style,
   size,
   speed,
@@ -154,7 +156,7 @@ const FloatingGeometry = ({
   shape,
 }: {
   scrollY: any;
-  mousePos: { x: number; y: number };
+  mouseX: any;
   style: React.CSSProperties;
   size: number;
   speed: number;
@@ -163,6 +165,7 @@ const FloatingGeometry = ({
 }) => {
   const y = useTransform(scrollY, [0, 5000], [0, 5000 * speed]);
   const springY = useSpring(y, { damping: 60, stiffness: 150 });
+  const moveX = useTransform(mouseX, [-0.5, 0.5], [-20, 20]);
 
   const getShape = () => {
     const strokeColor = "hsl(180 100% 50% / 0.12)";
@@ -206,7 +209,7 @@ const FloatingGeometry = ({
         ...style,
         position: "absolute",
         y: springY,
-        x: mousePos.x * 20,
+        x: moveX,
       }}
       animate={{
         rotate: [0, 360],

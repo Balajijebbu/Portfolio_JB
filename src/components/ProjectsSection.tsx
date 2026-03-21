@@ -319,9 +319,15 @@ const ProjectsSection = () => {
                 </div>
 
                 <div className="flex gap-4" style={{ transform: "translateZ(50px)" }}>
-                  <a href={project.github} target="_blank" className="px-8 py-3 rounded-xl bg-accent text-accent-foreground font-bold hover:shadow-[0_0_30px_hsl(270_100%_66%/0.5)] transition-all flex items-center gap-2">
-                    <Github size={18} /> View Repository
-                  </a>
+                  {project.title.includes("Saffron") ? (
+                    <div className="px-8 py-3 rounded-xl bg-accent/20 border border-accent/30 text-accent text-sm font-bold flex items-center gap-2">
+                       SIH 2024 Project
+                    </div>
+                  ) : (
+                    <a href={project.github} target="_blank" className="px-8 py-3 rounded-xl bg-accent text-accent-foreground font-bold hover:shadow-[0_0_30px_hsl(270_100%_66%/0.5)] transition-all flex items-center gap-2">
+                      <Github size={18} /> View Repository
+                    </a>
+                  )}
                 </div>
               </div>
 

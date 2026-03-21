@@ -1,60 +1,89 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, useSpring, useMotionValue } from "framer-motion";
 
 const CustomCursor = () => {
   const [isPointer, setIsPointer] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   
-  const springConfig = { damping: 25, stiffness: 200 };
+  const springConfig = { damping: 20, stiffness: 250, mass: 0.5 };
   const mainX = useSpring(cursorX, springConfig);
   const mainY = useSpring(cursorY, springConfig);
   
-  const trailX = useSpring(cursorX, { damping: 40, stiffness: 150 });
-  const trailY = useSpring(cursorY, { damping: 40, stiffness: 150 });
+  const trailConfig = { damping: 30, stiffness: 120, mass: 0.8 };
+  const trailX = useSpring(cursorX, trailConfig);
+  const trailY = useSpring(cursorY, trailConfig);
 
   useEffect(() => {
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
+      
       if (!isVisible) setIsVisible(true);
 
+      // Optimized pointer check: avoid getComputedStyle on every move
       const target = e.target as HTMLElement;
-      setIsPointer(
-        window.getComputedStyle(target).cursor === "pointer" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "A" ||
-        target.closest("button") !== null ||
-        target.closest("a") !== null
-      );
+      const isClickable = 
+        target.tagName === "BUTTON" || 
+        target.tagName === "A" || 
+        target.closest("button") || 
+        target.closest("a") ||
+        window.getComputedStyle(target).cursor === "pointer";
+      
+      setIsPointer(!!isClickable);
     };
 
-    window.addEventListener("mousemove", moveCursor);
-    return () => window.removeEventListener("mousemove", moveCursor);
+    const handleMouseOut = () => setIsVisible(false);
+    const handleMouseOver = () => setIsVisible(true);
+
+    window.addEventListener("mousemove", moveCursor, { passive: true });
+    window.addEventListener("mouseout", handleMouseOut);
+    window.addEventListener("mouseover", handleMouseOver);
+    
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseout", handleMouseOut);
+      window.removeEventListener("mouseover", handleMouseOver);
+    };
   }, [cursorX, cursorY, isVisible]);
 
   if (!isVisible) return null;
 
   return (
-    <>
+    <div className="fixed inset-0 pointer-events-none z-[9999]">
       {/* Main dot */}
       <motion.div
-        className="fixed top-0 left-0 w-3 h-3 bg-primary rounded-full z-[9999] pointer-events-none mix-blend-difference"
-        style={{ x: mainX, y: mainY, translateX: "-50%", translateY: "-50%" }}
-        animate={{ scale: isPointer ? 2.5 : 1 }}
+        className="absolute top-0 left-0 w-2.5 h-2.5 bg-primary rounded-full mix-blend-difference"
+        style={{ 
+          x: mainX, 
+          y: mainY, 
+          translateX: "-50%", 
+          translateY: "-50%",
+        }}
+        animate={{ 
+          scale: isPointer ? 3 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
       />
       
       {/* Outer ring / trail */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 border border-primary/50 rounded-full z-[9998] pointer-events-none"
-        style={{ x: trailX, y: trailY, translateX: "-50%", translateY: "-50%" }}
+        className="absolute top-0 left-0 w-8 h-8 border border-primary/40 rounded-full"
+        style={{ 
+          x: trailX, 
+          y: trailY, 
+          translateX: "-50%", 
+          translateY: "-50%",
+        }}
         animate={{ 
-          scale: isPointer ? 1.5 : 1,
-          opacity: isPointer ? 0.3 : 0.6 
+          scale: isPointer ? 1.8 : 1,
+          opacity: isPointer ? 0.2 : 0.5,
+          borderWidth: isPointer ? "1px" : "1.5px"
         }}
       />
-    </>
+    </div>
   );
 };
 

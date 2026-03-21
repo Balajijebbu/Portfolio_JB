@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Globe, Users, TrendingUp } from "lucide-react";
 
 interface VisitorInfo {
@@ -9,6 +9,12 @@ interface VisitorInfo {
 
 const VisitorStats = () => {
   const [stats, setStats] = useState<VisitorInfo>({ count: 1248, location: "Loading..." });
+  const { scrollY } = useScroll();
+  
+  // Fade out stats as user scrolls down
+  const opacity = useTransform(scrollY, [0, 50], [1, 0]);
+  const y = useTransform(scrollY, [0, 50], [0, -20]);
+  const pointerEvents = useTransform(scrollY, [0, 50], ["auto", "none"] as any);
 
   useEffect(() => {
     // 1. Handle Persistent Visitor Count
@@ -44,7 +50,10 @@ const VisitorStats = () => {
   }, []);
 
   return (
-    <div className="fixed top-24 right-8 z-30 hidden lg:block">
+    <motion.div 
+      style={{ opacity, y, pointerEvents }}
+      className="fixed top-24 right-8 z-30 hidden lg:block"
+    >
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -80,7 +89,7 @@ const VisitorStats = () => {
           <p className="text-[9px] font-mono-label text-primary uppercase">Live Active</p>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 

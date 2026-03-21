@@ -187,33 +187,6 @@ const ChatAssistant = () => {
 
   return (
     <>
-      {/* Floating Suggestions (Suggestion Chips) */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="fixed bottom-44 right-8 z-50 flex flex-col items-end gap-2"
-          >
-            {[
-              { label: "🚀 Start Tour", action: () => { startTour(); } },
-              { label: "📄 Resume", action: () => { handleSend("Can I see your resume?"); setIsOpen(true); } },
-              { label: "💻 Projects", action: () => { document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" }); } },
-            ].map((chip) => (
-              <motion.button
-                key={chip.label}
-                whileHover={{ scale: 1.05, x: -5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={chip.action}
-                className="px-4 py-2 rounded-full glass-card border border-primary/20 text-xs font-mono-label text-primary shadow-xl backdrop-blur-md"
-              >
-                {chip.label}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Floating Main Button */}
       <motion.button
@@ -229,33 +202,32 @@ const ChatAssistant = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.8, x: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, x: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 100, scale: 0.8, x: 20, filter: "blur(10px)" }}
-            className="fixed bottom-24 right-8 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[600px] glass-card border border-primary/20 shadow-2xl flex flex-col overflow-hidden"
+            initial={{ opacity: 0, y: 50, scale: 0.9, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 50, scale: 0.9, filter: "blur(4px)" }}
+            transition={{ type: "spring", damping: 30, stiffness: 250 }}
+            className="fixed bottom-24 right-8 z-50 w-[340px] max-w-[calc(100vw-2rem)] h-[500px] glass-card border border-primary/20 shadow-3xl flex flex-col overflow-hidden"
           >
-            {/* Header with Mode Selector */}
-            <div className="p-4 border-b border-primary/10 bg-primary/5 flex flex-col gap-3">
+            {/* Improved Compact Header */}
+            <div className="relative p-3 border-b border-primary/10 bg-primary/5 flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center animate-pulse-glow">
-                    <Sparkles size={16} className="text-primary" />
+                  <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center animate-pulse-glow">
+                    <Sparkles size={14} className="text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">Jeya Companion</h3>
-                    <div className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      <p className="text-[10px] text-primary uppercase font-mono-label tracking-tighter">AI Powered Agent</p>
-                    </div>
-                  </div>
+                  <h3 className="text-xs font-bold text-foreground">Jeya Companion</h3>
                 </div>
-                <button onClick={() => setIsOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
-                  <X size={18} />
+                {/* Close Button - More isolated */}
+                <button 
+                  onClick={() => setIsOpen(false)} 
+                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all border border-transparent hover:border-primary/20"
+                >
+                  <X size={16} />
                 </button>
               </div>
 
-              {/* Mode Selector */}
-              <div className="flex bg-muted/30 p-1 rounded-xl gap-1">
+              {/* Ultra Compact Mode Selector */}
+              <div className="flex bg-muted/20 p-0.5 rounded-lg">
                 {[
                   { id: "recruiter", icon: UserCheck, label: "Recruiter" },
                   { id: "developer", icon: Terminal, label: "Dev" },
@@ -264,102 +236,102 @@ const ChatAssistant = () => {
                   <button
                     key={mode.id}
                     onClick={() => setActiveMode(mode.id as any)}
-                    className={`flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-[10px] font-mono-label transition-all ${
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1 rounded-md text-[9px] font-mono-label transition-all ${
                       activeMode === mode.id 
                         ? "bg-primary text-primary-foreground shadow-lg" 
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                     }`}
                   >
-                    <mode.icon size={12} />
+                    <mode.icon size={10} />
                     {mode.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Messages Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 mesh-gradient custom-scrollbar">
+            {/* Messages Area - Compact padding */}
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3.5 mesh-gradient custom-scrollbar">
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`group relative max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                  <div className={`group relative max-w-[88%] p-3 rounded-xl text-[13px] leading-relaxed shadow-sm ${
                     msg.role === "user" 
                       ? "bg-primary text-primary-foreground ml-auto rounded-tr-none" 
-                      : "glass-card border border-primary/10 rounded-tl-none"
+                      : "glass-card border border-primary/10 rounded-tl-none bg-black/40"
                   }`}>
                     {msg.content}
                     {(msg.content.toLowerCase().includes("resume") || msg.content.toLowerCase().includes("cv")) && msg.role === "bot" && (
                       <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 p-3 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-between gap-4"
+                        className="mt-2.5 p-2 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-between gap-3"
                       >
-                        <div className="flex items-center gap-2">
-                           <Layout size={16} className="text-primary" />
-                           <span className="text-[10px] font-bold uppercase tracking-wider">Jeya_Resume.pdf</span>
+                        <div className="flex items-center gap-2 overflow-hidden">
+                           <Layout size={14} className="text-primary shrink-0" />
+                           <span className="text-[9px] font-bold uppercase tracking-wider truncate">Resume.pdf</span>
                         </div>
                         <button 
-                          onClick={() => toast.info("Resume download started...")}
-                          className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold hover:bg-primary/80 transition-all flex items-center gap-1"
+                          onClick={() => {
+                            document.querySelector<HTMLButtonElement>("button[variant='heroOutline']")?.click();
+                            toast.success("Downloading...");
+                          }}
+                          className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[9px] font-bold shrink-0"
                         >
-                           <Volume2 size={12} className="rotate-90" /> Download
+                           Download
                         </button>
                       </motion.div>
-                    )}
-                    {msg.role === "bot" && (
-                      <div className="absolute -left-10 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                            <Bot size={14} className="text-primary" />
-                         </div>
-                      </div>
                     )}
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Quick Action Footer */}
-            <div className="px-4 py-2 border-t border-primary/5 bg-background/20 flex gap-2 overflow-x-auto no-scrollbar">
-               <button onClick={startTour} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[10px] font-bold hover:bg-accent/20 transition-all">
-                  <Play size={10} /> Start Tour
-               </button>
-               <button onClick={() => handleSend("Tell me about your tech stack")} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold hover:bg-primary/20 transition-all">
-                  <Layout size={10} /> Tech Stack
-               </button>
-               <button onClick={() => handleSend("How can I hire you?")} className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold hover:bg-primary/20 transition-all">
-                  <ArrowRight size={10} /> Hire Me
-               </button>
+            {/* Compact Quick Action Footer */}
+            <div className="px-3 py-1.5 border-t border-primary/5 bg-background/40 flex gap-1.5 overflow-x-auto no-scrollbar">
+               {[
+                 { label: "Start Tour", icon: Play, action: startTour, color: "accent" },
+                 { label: "Stack", icon: Layout, action: () => handleSend("Tech stack?"), color: "primary" },
+                 { label: "Hire Me", icon: ArrowRight, action: () => handleSend("Hire me"), color: "primary" },
+               ].map((action) => (
+                 <button 
+                   key={action.label}
+                   onClick={action.action} 
+                   className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-${action.color}/10 border border-${action.color}/20 text-${action.color} text-[9px] font-bold hover:bg-${action.color}/20`}
+                 >
+                    <action.icon size={10} /> {action.label}
+                 </button>
+               ))}
             </div>
 
-            {/* Input Area */}
-            <div className="p-4 bg-background/80 backdrop-blur-md border-t border-primary/10">
-              <div className="flex gap-2">
+            {/* Input Area - Tighter padding */}
+            <div className="p-3 bg-background/95 backdrop-blur-md border-t border-primary/10">
+              <div className="flex gap-1.5">
                 <button
                   onClick={toggleListening}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                    isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted/50 text-muted-foreground hover:text-primary"
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                    isListening ? "bg-red-500 text-white animate-pulse" : "bg-muted/30 text-muted-foreground"
                   }`}
                 >
-                  {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                  {isListening ? <MicOff size={16} /> : <Mic size={16} />}
                 </button>
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder={isListening ? "Listening..." : "Ask your AI companion..."}
-                  className="flex-1 bg-muted/30 border border-primary/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground/50"
+                  placeholder="Ask me anything..."
+                  className="flex-1 bg-muted/20 border border-primary/5 rounded-lg px-3 py-1.5 text-[13px] focus:outline-none focus:border-primary/40 placeholder:text-muted-foreground/40"
                 />
                 <button
                   onClick={() => handleSend()}
                   disabled={!input.trim()}
-                  className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 transition-all"
+                  className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-30 shadow-lg shadow-primary/10"
                 >
-                  <Send size={18} />
+                  <Send size={16} />
                 </button>
               </div>
             </div>
