@@ -104,52 +104,72 @@ const HeroSection = () => {
         className="container mx-auto px-6 relative z-10"
       >
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          {/* Profile image with 3D effect */}
+          {/* Banner image with cinematic 3D depth */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotateY: -30, filter: "blur(20px)" }}
             animate={{ opacity: 1, scale: 1, rotateY: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.2, ease }}
-            className="relative perspective-1200"
+            className="relative"
+            style={{ perspective: "1200px" }}
           >
             <div className="relative animate-float">
+              {/* Pulsing glow behind image */}
               <motion.div
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.3, 0.7, 0.3],
-                }}
+                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.8, 0.3] }}
                 transition={{ duration: 6, repeat: Infinity }}
-                className="absolute -inset-8 rounded-[3rem] bg-gradient-to-r from-primary/40 to-accent/40 blur-3xl -z-10"
+                className="absolute -inset-10 rounded-[3rem] bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 blur-3xl -z-10"
               />
 
-              {/* Orbiting ring around profile */}
+              {/* Outer orbiting ring */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-6 rounded-[3rem] border border-primary/20 -z-5"
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-8 rounded-[3rem] border border-primary/20 -z-5"
                 style={{ transform: "rotateX(75deg)" }}
+              />
+              {/* Inner orbiting ring */}
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-4 rounded-[3rem] border border-accent/15 -z-5"
+                style={{ transform: "rotateX(65deg) rotateZ(30deg)" }}
               />
 
               <motion.div
-                whileHover={{ rotateY: 25, rotateX: -15, scale: 1.08 }}
+                whileHover={{ rotateY: 20, rotateX: -10, scale: 1.06 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="w-56 h-56 md:w-72 md:h-72 rounded-[2.5rem] overflow-hidden glass-card p-1.5 relative z-10 shadow-2xl"
+                className="w-64 h-72 md:w-80 md:h-96 rounded-[2.5rem] overflow-hidden glass-card p-1.5 relative z-10 shadow-2xl"
                 style={{ transformStyle: "preserve-3d" }}
               >
+                {/* Main image layer */}
                 <div
-                  className="w-full h-full rounded-[2rem] overflow-hidden"
+                  className="w-full h-full rounded-[2rem] overflow-hidden relative"
                   style={{ transform: "translateZ(40px)" }}
                 >
                   <img
                     src={profileImg}
                     alt="Jeya Balaji C K"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
+                  {/* Bottom gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                 </div>
 
-                {/* 3D Glass Overlay */}
+                {/* 3D Glass reflection overlay */}
                 <div
-                  className="absolute inset-0 rounded-[2rem] border border-white/20 z-20 pointer-events-none"
+                  className="absolute inset-0 rounded-[2rem] border border-white/10 z-20 pointer-events-none"
                   style={{ transform: "translateZ(60px)" }}
+                />
+
+                {/* Floating depth highlight */}
+                <motion.div
+                  animate={{ opacity: [0.1, 0.3, 0.1], x: [-20, 20, -20] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute inset-0 rounded-[2rem] z-20 pointer-events-none"
+                  style={{
+                    transform: "translateZ(80px)",
+                    background: "linear-gradient(120deg, transparent 30%, hsl(var(--primary) / 0.15) 50%, transparent 70%)",
+                  }}
                 />
               </motion.div>
             </div>
