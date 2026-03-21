@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { ArrowDown, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import profileImg from "@/assets/profile.jpg";
+import profileImg from "@/assets/banner.jpg";
 import { useRef, useEffect } from "react";
 import { LetterReveal } from "@/components/ui/LetterReveal";
 
